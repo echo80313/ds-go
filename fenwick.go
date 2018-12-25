@@ -2,7 +2,9 @@ package ds
 
 import "fmt"
 
-// FenwickTree
+// FenwickTree a.k.a BIT tree supports point add and prefix sum
+// query in O(n log n) which n is the array size embedded in FenwickTree
+// It's 1-indexed
 type FenwickTree struct {
 	size int
 	data []int
@@ -18,13 +20,15 @@ func NewFenwickTree(sz int) (*FenwickTree, error) {
 	}, nil
 }
 
-func (f *FenwickTree) Update(at, val int) {
+// Add adds value to element at index `at`
+func (f *FenwickTree) Add(at, val int) {
 	for at <= f.size {
 		f.data[at] += val
 		at += LeastSignificantBit(at)
 	}
 }
 
+// Sum calculates the prefix sum [1 ... at]
 func (f *FenwickTree) Sum(at int) int {
 	sum := 0
 	for at > 0 {
