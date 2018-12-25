@@ -1,0 +1,1 @@
+Some data structures implemented in go as my free time programming practice
