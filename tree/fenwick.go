@@ -1,6 +1,10 @@
-package ds
+package tree
 
-import "fmt"
+import (
+	"fmt"
+
+	ds "github.com/echo80313/ds-go"
+)
 
 // FenwickTree a.k.a BIT tree supports point add and prefix sum
 // query in O(n log n) which n is the array size embedded in FenwickTree
@@ -16,7 +20,7 @@ func NewFenwickTree(sz int) (*FenwickTree, error) {
 	}
 	return &FenwickTree{
 		size: sz,
-		data: make([]int, NextPowerOf2(sz+1)),
+		data: make([]int, ds.NextPowerOf2(sz+1)),
 	}, nil
 }
 
@@ -24,7 +28,7 @@ func NewFenwickTree(sz int) (*FenwickTree, error) {
 func (f *FenwickTree) Add(at, val int) {
 	for at <= f.size {
 		f.data[at] += val
-		at += LeastSignificantBit(at)
+		at += ds.LeastSignificantBit(at)
 	}
 }
 
@@ -33,7 +37,7 @@ func (f *FenwickTree) Sum(at int) int {
 	sum := 0
 	for at > 0 {
 		sum += f.data[at]
-		at -= LeastSignificantBit(at)
+		at -= ds.LeastSignificantBit(at)
 	}
 	return sum
 }
