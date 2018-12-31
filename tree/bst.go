@@ -1,5 +1,10 @@
 package tree
 
+import (
+	"fmt"
+	"io"
+)
+
 type ComparableValue interface {
 	Less(interface{}) bool
 	Equal(interface{}) bool
@@ -56,9 +61,9 @@ func (b *BinarySearchTree) Find(data ComparableValue) bool {
 			return true
 		}
 		if ptr.data.Less(data) {
-			ptr = ptr.chld[0]
-		} else {
 			ptr = ptr.chld[1]
+		} else {
+			ptr = ptr.chld[0]
 		}
 	}
 	return false
@@ -77,18 +82,35 @@ func (b *BinarySearchTree) Insert(data ComparableValue) {
 	var nxt *BinarySearchTreeNode
 	for {
 		if ptr.data.Less(data) {
-			nxt = ptr.chld[0]
-			if nxt == nullBinarySearchTreeNode {
-				ptr.chld[0] = NewBinarySearchTreeNode(data)
-				return
-			}
-		} else {
 			nxt = ptr.chld[1]
 			if nxt == nullBinarySearchTreeNode {
 				ptr.chld[1] = NewBinarySearchTreeNode(data)
 				return
 			}
+		} else {
+			nxt = ptr.chld[0]
+			if nxt == nullBinarySearchTreeNode {
+				ptr.chld[0] = NewBinarySearchTreeNode(data)
+				return
+			}
 		}
 		ptr = nxt
 	}
+}
+
+func (b *BinarySearchTree) InOrderPrint(writer io.Writer) {
+	stk := make([]*BinarySearchTreeNode, 0)
+	cur := b.root
+	for cur != nullBinarySearchTreeNode || len(stk) > 0 {
+		for cur != nullBinarySearchTreeNode {
+			stk = append(stk, cur)
+			cur = cur.chld[0]
+		}
+
+		cur, stk = stk[len(stk)-1], stk[:len(stk)-1]
+		fmt.Fprintf(writer, "%v ", cur.data)
+
+		cur = cur.chld[1]
+	}
+	fmt.Fprintf(writer, "\n")
 }
