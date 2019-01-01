@@ -55,10 +55,14 @@ func NewBinarySearchTree() *BinarySearchTree {
 }
 
 func (b *BinarySearchTree) Find(data ComparableValue) bool {
+	return b.findNode(data) == nullBinarySearchTreeNode
+}
+
+func (b *BinarySearchTree) findNode(data ComparableValue) *BinarySearchTreeNode {
 	ptr := b.root
 	for ptr != nullBinarySearchTreeNode {
 		if ptr.data.Equal(data) {
-			return true
+			break
 		}
 		if ptr.data.Less(data) {
 			ptr = ptr.chld[1]
@@ -66,7 +70,7 @@ func (b *BinarySearchTree) Find(data ComparableValue) bool {
 			ptr = ptr.chld[0]
 		}
 	}
-	return false
+	return ptr
 }
 
 func (b *BinarySearchTree) put(data ComparableValue, ptr *BinarySearchTreeNode, dir int) {
@@ -113,4 +117,53 @@ func (b *BinarySearchTree) InOrderPrint(writer io.Writer) {
 		cur = cur.chld[1]
 	}
 	fmt.Fprintf(writer, "\n")
+}
+
+func (b *BinarySearchTree) findMost(node *BinarySearchTreeNode, polar int) *BinarySearchTreeNode {
+	cur := node
+	for cur.chld[polar] != nullBinarySearchTreeNode {
+		cur = cur.chld[polar]
+	}
+	return cur
+}
+
+func (b *BinarySearchTree) FindMax() ComparableValue {
+	return b.findMost(b.root, 1).data
+}
+
+func (b *BinarySearchTree) FindMin() ComparableValue {
+	return b.findMost(b.root, 0).data
+}
+
+func (b *BinarySearchTree) inorderSuccessorHelper(
+	node *BinarySearchTreeNode) *BinarySearchTreeNode {
+	if node.chld[1] != nullBinarySearchTreeNode {
+		return b.findMost(node.chld[1], 0)
+	}
+	cur := b.root
+	for cur != nullBinarySearchTreeNode {
+		if node.data.Less(cur.data) {
+			return cur
+		} else if !node.data.Equal(cur.data) {
+			cur = cur.chld[1]
+		} else {
+			// sad...
+			return nullBinarySearchTreeNode
+		}
+	}
+	// should not reach here bcz node is not in the tree
+	// in this case
+	return nullBinarySearchTreeNode
+}
+
+func (b *BinarySearchTree) InorderSuccessor(data ComparableValue) (ComparableValue, error) {
+	node := b.findNode(data)
+	if node == nullBinarySearchTreeNode {
+		return nil, fmt.Errorf("InorderSuccessor: can't find node with value %v", data)
+	}
+	successor := b.inorderSuccessorHelper(node)
+	if successor != nullBinarySearchTreeNode {
+		return successor.data, nil
+	}
+	return nil, fmt.Errorf("InorderSuccessor: %v is the last value", data)
 }
