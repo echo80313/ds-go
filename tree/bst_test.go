@@ -35,6 +35,49 @@ func TestFindMinAndMax(t *testing.T) {
 	assert.Equal(t, Int(0), bst.FindMin())
 }
 
+func TestDelete(t *testing.T) {
+	bst := NewBinarySearchTree()
+	bst.Insert(Int(10))
+	bst.Insert(Int(12))
+	bst.Insert(Int(19))
+	bst.Insert(Int(8))
+	bst.Insert(Int(1))
+	bst.Insert(Int(0))
+	bst.Insert(Int(3))
+	bst.Insert(Int(2))
+
+	err := bst.Delete(Int(100))
+	assert.NotNil(t, err)
+
+	// single right child
+	err = bst.Delete(Int(12))
+	assert.Nil(t, err)
+	assert.False(t, bst.Find(Int(12)))
+	assert.True(t, bst.Find(Int(19)))
+
+	// leaf
+	err = bst.Delete(Int(19))
+	assert.Nil(t, err)
+	assert.False(t, bst.Find(Int(19)))
+
+	// single left
+	err = bst.Delete(Int(8))
+	assert.Nil(t, err)
+	assert.False(t, bst.Find(Int(8)))
+	assert.True(t, bst.Find(Int(3)))
+	assert.True(t, bst.Find(Int(2)))
+	assert.True(t, bst.Find(Int(0)))
+	assert.True(t, bst.Find(Int(1)))
+
+	// both
+	err = bst.Delete(Int(1))
+	assert.Nil(t, err)
+	assert.False(t, bst.Find(Int(1)))
+	assert.True(t, bst.Find(Int(3)))
+	assert.True(t, bst.Find(Int(2)))
+	assert.True(t, bst.Find(Int(0)))
+}
+
 func TestFindInorderSuccessor(t *testing.T) {
 	bst := NewBinarySearchTree()
 	bst.Insert(Int(10))
