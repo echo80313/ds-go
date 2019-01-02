@@ -128,15 +128,14 @@ func (b *BinarySearchTree) Delete(data ComparableValue) error {
 	}
 
 	// has only one child
-	if node.chld[0] != nullBinarySearchTreeNode {
-		node.parent.chld[node.childWhich] = node.chld[0]
-		node.chld[0].parent = node.parent
-		node.chld[0].childWhich = node.childWhich
-		return nil
+	for i := 0; i < 2; i++ {
+		if node.chld[i] != nullBinarySearchTreeNode {
+			node.parent.chld[node.childWhich] = node.chld[i]
+			node.chld[i].parent = node.parent
+			node.chld[i].childWhich = node.childWhich
+			return nil
+		}
 	}
-	node.parent.chld[node.childWhich] = node.chld[1]
-	node.chld[1].parent = node.parent
-	node.chld[1].childWhich = node.childWhich
 	return nil
 }
 
