@@ -5,49 +5,6 @@ import (
 	"io"
 )
 
-type ComparableValue interface {
-	Less(interface{}) bool
-	Equal(interface{}) bool
-}
-
-type Int int
-
-func (i Int) Less(v interface{}) bool {
-	if vInt, ok := v.(Int); ok {
-		return i < vInt
-	}
-	return false
-}
-
-func (i Int) Equal(v interface{}) bool {
-	if vInt, ok := v.(Int); ok {
-		return i == vInt
-	}
-	return false
-}
-
-var _ ComparableValue = Int(0)
-
-type BinarySearchTreeNode struct {
-	data       ComparableValue
-	chld       []*BinarySearchTreeNode
-	parent     *BinarySearchTreeNode
-	childWhich int
-}
-
-var nullBinarySearchTreeNode = &BinarySearchTreeNode{}
-
-func NewBinarySearchTreeNode(data ComparableValue) *BinarySearchTreeNode {
-	node := &BinarySearchTreeNode{
-		data: data,
-		chld: make([]*BinarySearchTreeNode, 2),
-	}
-	node.chld[0] = nullBinarySearchTreeNode
-	node.chld[1] = nullBinarySearchTreeNode
-	node.parent = nullBinarySearchTreeNode
-	return node
-}
-
 // BinarySearchTree yes, bst
 type BinarySearchTree struct {
 	root *BinarySearchTreeNode
@@ -68,9 +25,9 @@ func (b *BinarySearchTree) findNode(data ComparableValue) *BinarySearchTreeNode 
 			break
 		}
 		if ptr.data.Less(data) {
-			ptr = ptr.chld[1]
+			ptr = ptr.chld[RightChld]
 		} else {
-			ptr = ptr.chld[0]
+			ptr = ptr.chld[LeftChld]
 		}
 	}
 	return ptr
@@ -85,21 +42,21 @@ func (b *BinarySearchTree) Insert(data ComparableValue) {
 	var nxt *BinarySearchTreeNode
 	for {
 		if ptr.data.Less(data) {
-			nxt = ptr.chld[1]
+			nxt = ptr.chld[RightChld]
 			if nxt == nullBinarySearchTreeNode {
 				newNode := NewBinarySearchTreeNode(data)
 				newNode.parent = ptr
 				newNode.childWhich = 1
-				ptr.chld[1] = newNode
+				ptr.chld[RightChld] = newNode
 				return
 			}
 		} else {
-			nxt = ptr.chld[0]
+			nxt = ptr.chld[LeftChld]
 			if nxt == nullBinarySearchTreeNode {
 				newNode := NewBinarySearchTreeNode(data)
 				newNode.parent = ptr
 				newNode.childWhich = 0
-				ptr.chld[0] = newNode
+				ptr.chld[LeftChld] = newNode
 				return
 			}
 		}
@@ -112,14 +69,14 @@ func (b *BinarySearchTree) Delete(data ComparableValue) error {
 	if node == nullBinarySearchTreeNode {
 		return fmt.Errorf("Value: %v doesn't exist", data)
 	}
-	if node.chld[0] == nullBinarySearchTreeNode &&
-		node.chld[1] == nullBinarySearchTreeNode {
+	if node.chld[LeftChld] == nullBinarySearchTreeNode &&
+		node.chld[RightChld] == nullBinarySearchTreeNode {
 		// leaf case
 		node.parent.chld[node.childWhich] = nullBinarySearchTreeNode
 		return nil
 	}
-	if node.chld[0] != nullBinarySearchTreeNode &&
-		node.chld[1] != nullBinarySearchTreeNode {
+	if node.chld[LeftChld] != nullBinarySearchTreeNode &&
+		node.chld[RightChld] != nullBinarySearchTreeNode {
 		// have both
 		successor := b.inorderSuccessorHelper(node)
 		node.data = successor.data
@@ -145,13 +102,13 @@ func (b *BinarySearchTree) InOrderPrint(writer io.Writer) {
 	for cur != nullBinarySearchTreeNode || len(stk) > 0 {
 		for cur != nullBinarySearchTreeNode {
 			stk = append(stk, cur)
-			cur = cur.chld[0]
+			cur = cur.chld[LeftChld]
 		}
 
 		cur, stk = stk[len(stk)-1], stk[:len(stk)-1]
 		fmt.Fprintf(writer, "%v ", cur.data)
 
-		cur = cur.chld[1]
+		cur = cur.chld[RightChld]
 	}
 	fmt.Fprintf(writer, "\n")
 }
@@ -174,15 +131,15 @@ func (b *BinarySearchTree) FindMin() ComparableValue {
 
 func (b *BinarySearchTree) inorderSuccessorHelper(
 	node *BinarySearchTreeNode) *BinarySearchTreeNode {
-	if node.chld[1] != nullBinarySearchTreeNode {
-		return b.findMost(node.chld[1], 0)
+	if node.chld[RightChld] != nullBinarySearchTreeNode {
+		return b.findMost(node.chld[RightChld], 0)
 	}
 	cur := b.root
 	for cur != nullBinarySearchTreeNode {
 		if node.data.Less(cur.data) {
 			return cur
 		} else if !node.data.Equal(cur.data) {
-			cur = cur.chld[1]
+			cur = cur.chld[RightChld]
 		} else {
 			// sad...
 			return nullBinarySearchTreeNode
