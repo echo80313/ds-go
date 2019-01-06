@@ -11,7 +11,7 @@ type BinarySearchTree struct {
 }
 
 func NewBinarySearchTree() *BinarySearchTree {
-	return &BinarySearchTree{root: nullBinarySearchTreeNode}
+	return &BinarySearchTree{root: NewBinarySearchTreeNode(Int(0))}
 }
 
 func (b *BinarySearchTree) Find(data ComparableValue) bool {
@@ -19,7 +19,7 @@ func (b *BinarySearchTree) Find(data ComparableValue) bool {
 }
 
 func (b *BinarySearchTree) findNode(data ComparableValue) *BinarySearchTreeNode {
-	ptr := b.root
+	ptr := b.root.chld[LeftChld]
 	for ptr != nullBinarySearchTreeNode {
 		if ptr.data.Equal(data) {
 			break
@@ -34,11 +34,13 @@ func (b *BinarySearchTree) findNode(data ComparableValue) *BinarySearchTreeNode 
 }
 
 func (b *BinarySearchTree) Insert(data ComparableValue) {
-	if b.root == nullBinarySearchTreeNode {
-		b.root = NewBinarySearchTreeNode(data)
+	if b.root.chld[LeftChld] == nullBinarySearchTreeNode {
+		b.root.chld[LeftChld] = NewBinarySearchTreeNode(data)
+		b.root.chld[LeftChld].parent = b.root
+		b.root.chld[LeftChld].childWhich = LeftChld
 		return
 	}
-	ptr := b.root
+	ptr := b.root.chld[LeftChld]
 	var nxt *BinarySearchTreeNode
 	for {
 		if ptr.data.Less(data) {
@@ -98,7 +100,7 @@ func (b *BinarySearchTree) Delete(data ComparableValue) error {
 
 func (b *BinarySearchTree) InOrderPrint(writer io.Writer) {
 	stk := make([]*BinarySearchTreeNode, 0)
-	cur := b.root
+	cur := b.root.chld[LeftChld]
 	for cur != nullBinarySearchTreeNode || len(stk) > 0 {
 		for cur != nullBinarySearchTreeNode {
 			stk = append(stk, cur)
@@ -122,11 +124,11 @@ func (b *BinarySearchTree) findMost(node *BinarySearchTreeNode, polar int) *Bina
 }
 
 func (b *BinarySearchTree) FindMax() ComparableValue {
-	return b.findMost(b.root, 1).data
+	return b.findMost(b.root.chld[LeftChld], 1).data
 }
 
 func (b *BinarySearchTree) FindMin() ComparableValue {
-	return b.findMost(b.root, 0).data
+	return b.findMost(b.root.chld[LeftChld], 0).data
 }
 
 func (b *BinarySearchTree) inorderSuccessorHelper(
@@ -134,7 +136,7 @@ func (b *BinarySearchTree) inorderSuccessorHelper(
 	if node.chld[RightChld] != nullBinarySearchTreeNode {
 		return b.findMost(node.chld[RightChld], 0)
 	}
-	cur := b.root
+	cur := b.root.chld[LeftChld]
 	for cur != nullBinarySearchTreeNode {
 		if node.data.Less(cur.data) {
 			return cur

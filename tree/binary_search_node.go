@@ -48,7 +48,7 @@ func NewBinarySearchTreeNode(data ComparableValue) *BinarySearchTreeNode {
 	return node
 }
 
-// Rotate performes, yes, bst rotation.
+// Rotate performs, yes, bst rotation.
 // d = 0 Left rotate
 // d = 1 Right rotate
 func (o *BinarySearchTreeNode) Rotate(d int) {
@@ -57,14 +57,20 @@ func (o *BinarySearchTreeNode) Rotate(d int) {
 	oChldWhich := o.childWhich
 
 	o.chld[d^1] = k.chld[d]
-	k.chld[d].parent = o.chld[d^1]
-	k.chld[d].childWhich = d
+	if k.chld[d] != nullBinarySearchTreeNode {
+		k.chld[d].parent = o.chld[d^1]
+		k.chld[d].childWhich = d
+	}
 
 	k.chld[d] = o
 	o.parent = k.chld[d]
 	o.childWhich = d
 
-	oParent.chld[oChldWhich] = k
+	if oParent != nullBinarySearchTreeNode {
+		oParent.chld[oChldWhich] = k
+		k.parent = oParent
+		k.childWhich = oChldWhich
+	}
 }
 
 var nullBinarySearchTreeNode = &BinarySearchTreeNode{}
